@@ -8,13 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Kritik extends Model
 {
     use HasFactory;
+    protected $table = 'kritiks'; // atau sesuaikan dengan nama tabel kritiknya
+    protected $fillable = ['film_id', 'user_id', 'comment'];
 
-    protected $table = 'kritiks';
-    protected $primaryKey = 'id';
-    protected $fillable = [
-        'comment',
-        'rating',
-        'film_id',
-        'user_id',
-    ];
+    // Relasi ke User
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 }

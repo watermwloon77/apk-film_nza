@@ -6,7 +6,6 @@
 @endpush
 
 @push('scripts')
-
 <script type="text/javascript" src="{{ asset('template/list-js/jquery.basictable.min.js') }}"></script>
  <script type="text/javascript">
     $(document).ready(function() {
@@ -31,8 +30,8 @@
       </ol>
     </div>
     <div class="single-page-agile-info">
-                 <!-- /movie-browse-agile -->
-                         <div class="show-top-grids-w3lagile">
+             <!-- /movie-browse-agile -->
+                        <div class="show-top-grids-w3lagile">
       <div class="col-sm-8 single-left">
         <div class="song">
           <div class="single-right-grids">
@@ -42,7 +41,7 @@
             </div>
             <div class="col-md-8 single-right-grid-right">
               <div class="song-info">
-                <h2>{{ $film->title }}</h2>	
+                <h2>{{ $film->title }}</h2> 
                 <p class="author"><a href="#" class="author">{{ $film->year }}</a></p>
                 <p class="views">{{ $film->sinopsis }}</p>
               </div>
@@ -59,8 +58,8 @@
                       <tbody>
                         @foreach ($perans as $peran)
                         <tr>
-                          <td class="w3-list-info">{{ $peran->cast_id }}</td>
-                          <td class="w3-list-info">{{ $peran->actor }}</td>
+                          <td class="w3-list-info">{{ $peran->cast->name ?? $peran->cast_id }}</td>
+                          <td class="w3-list-info">{{ $peran->nama_peran ?? $peran->actor }}</td>
                         </tr>
                         @endforeach
                       </tbody>
@@ -118,27 +117,31 @@
           <div class="all-comments-info">
             <a href="#">Comments</a>
             <div class="agile-info-wthree-box">
-              <form>
-                <input type="text" placeholder="Name" required="">			           					   
-                <input type="text" placeholder="Email" required="">
-                <input type="text" placeholder="Phone" required="">
-                <textarea placeholder="Message" required=""></textarea>
-                <input type="submit" value="SEND">
-                <div class="clearfix"> </div>
-              </form>
+              @auth
+                <form action="#" method="POST">
+                  @csrf
+                  <textarea name="comment" placeholder="Tulis komentar kamu di sini..." required=""></textarea>
+                  <input type="submit" value="SEND">
+                  <div class="clearfix"> </div>
+                </form>
+              @else
+                <p style="color: #fff; text-align: center; padding: 15px;">
+                  Silakan <a href="{{ route('login') }}" style="color: #ff9900; text-decoration: underline; font-weight: bold;">Login</a> terlebih dahulu untuk memberikan komentar.
+                </p>
+              @endauth
             </div>
-          </div>
-          <div class="media-grids">
+          </div> 
+          <div class="media-grids" style="margin-top: 20px;">
             @foreach ($comments as $comment)
-              <div class="media">
-                <h5>{{ $comment->user_id }}</h5>
+              <div class="media" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
                 <div class="media-left">
                   <a href="#">
-                    <img src="{{ asset('storage/images/user.jpg') }}" title="One movies" alt=" " />
+                    <img src="{{ asset('storage/images/user.jpg') }}" title="One movies" alt=" " style="width: 50px; height: 50px; border-radius: 50%;" />
                   </a>
                 </div>
                 <div class="media-body">
-                  <p>{{ $comment->comment }}</p>
+                  <h5 style="color: #ff9900; font-weight: bold; margin-bottom: 5px;">{{ $comment->user->name ?? 'Anonim' }}</h5>
+                  <p style="color: #fff;">{{ $comment->comment }}</p>
                 </div>
               </div>
             @endforeach
@@ -147,16 +150,16 @@
       </div>
       <div class="col-md-4 single-right">
         <h3>Similar Film By Genre</h3>
-        @foreach ($filmByGenre as $film)
+        @foreach ($filmByGenre as $similarFilm)
           <div class="single-grid-right">
             <div class="single-right-grids">
               <div class="col-md-4 single-right-grid-left">
-                <a href="{{ route('movies.show', $film->id) }}"><img src="/{{ $film->poster }}" alt="" /></a>
+                <a href="{{ route('movies.show', $similarFilm->id) }}"><img src="/{{ $similarFilm->poster }}" alt="" /></a>
               </div>
               <div class="col-md-8 single-right-grid-right">
-                <a href="{{ route('movies.show', $film->id) }}" class="title">{{ $film->title }}</a>
-                <p class="author"><a href="#" class="author">{{ $film->year }}</a></p>
-                <p class="views" style="text-align: justify; margin-right: 10px">{{ $film->sinopsis }}</p>
+                <a href="{{ route('movies.show', $similarFilm->id) }}" class="title">{{ $similarFilm->title }}</a>
+                <p class="author"><a href="#" class="author">{{ $similarFilm->year }}</a></p>
+                <p class="views" style="text-align: justify; margin-right: 10px">{{ $similarFilm->sinopsis }}</p>
               </div>
               <div class="clearfix"> </div>
             </div>
@@ -177,7 +180,7 @@
               </a>
               <div class="mid-1 agileits_w3layouts_mid_1_home">
                 <div class="w3l-movie-text">
-                  <h6><a href="{{ route('movies.show', $filmRelease->id) }}">{{ $filmRelease->title }}</a></h6>							
+                  <h6><a href="{{ route('movies.show', $filmRelease->id) }}">{{ $filmRelease->title }}</a></h6>            
                 </div>
                 <div class="mid-2 agile_mid_2_home">
                   <p>{{ $filmRelease->year }}</p>
@@ -204,19 +207,17 @@
       </div>
     </div>
   <!--body wrapper end-->
-          
-             
-      </div>
-      <!-- //w3l-latest-movies-grids -->
-    </div>	
-  </div>
+     </div>
+     <!-- //w3l-latest-movies-grids -->
+   </div>  
+ </div>
 @endsection
 
 @push('scripts')
 <script src="js/simplePlayer.js"></script>
 <script>
-	$("document").ready(function() {
-		$("#video").simplePlayer();
-	});
+  $("document").ready(function() {
+    $("#video").simplePlayer();
+  });
 </script>
 @endpush

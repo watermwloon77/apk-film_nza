@@ -27,11 +27,20 @@ class KritikController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreKritikRequest $request)
+public function store(Request $request, $film_id)
     {
-        //
-    }
+        $request->validate([
+            'comment' => 'required|string',
+        ]);
 
+        Kritik::create([
+            'film_id' => $film_id,
+            'user_id' => auth()->id(),
+            'comment' => $request->comment,
+        ]);
+
+        return back()->with('success', 'Komentar berhasil ditambahkan!');
+    }
     /**
      * Display the specified resource.
      */

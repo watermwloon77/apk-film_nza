@@ -19,13 +19,13 @@ class FilmController extends Controller
      */
     public function movies()
     {
-        //
+    
         $genreFilm = null;
         $films = Film::select('id','title', 'poster','year')
                 ->orderByDesc('year')
                 ->OrderBy('created_at', 'asc')
                 ->paginate(18);
-        return view('components/movies', compact('films', 'genreFilm'));
+        return view('movies', compact('films', 'genreFilm'));
     }
 
     /**
@@ -41,7 +41,17 @@ class FilmController extends Controller
      */
     public function store(StoreFilmRequest $request)
     {
-        //
+        // Validasi data sudah diurus oleh StoreFilmRequest, kita tinggal simpan
+        $data = $request->validated();
+
+        // Jika ada upload poster/gambar
+        if ($request->hasFile('poster')) {
+            $data['poster'] = $request->file('poster')->store('images', 'public');
+        }
+
+        Film::create($data);
+
+        return redirect()->route('movies')->with('success', 'Film berhasil ditambahkan!');
     }
 
     /**
@@ -81,16 +91,26 @@ class FilmController extends Controller
      * Update the specified resource in storage.
      */
     public function update(UpdateFilmRequest $request, Film $film)
-    {
-        //
-    }
+{
+        $data = $request->validated();
 
+        // Jika upload gambar baru
+        if ($request->hasFile('poster')) {
+            $data['poster'] = $request->file('poster')->store('images', 'public');
+        }
+
+        $film->update($data);
+
+        return redirect()->route('movies')->with('success', 'Film berhasil diperbarui!');
+    }
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Film $film)
-    {
-        //
+{
+        $film->delete();
+
+        return redirect()->route('movies')->with('success', 'Film berhasil dihapus!');
     }
 
     public function movieHome()
@@ -109,7 +129,9 @@ class FilmController extends Controller
                         ->orderByDesc('year')
                         ->OrderBy('created_at', 'asc')
                         ->limit(6)->get();
-        return view('components/home', compact('filmSlidey','films','filmFutured','filmRecentAdded'));
+                        
+        // Ubah dari 'components/home' menjadi 'home' di bawah ini:
+        return view('home', compact('filmSlidey','films','filmFutured','filmRecentAdded'));
     }
 
     public function moviesByGenre($genre)
@@ -121,6 +143,6 @@ class FilmController extends Controller
                 ->orderByDesc('year')
                 ->OrderBy('created_at', 'asc')
                 ->paginate(18);
-        return view('components/movies', compact('films','genreFilm'));
+        return view('movies', compact('films','genreFilm'));
     }
 }
