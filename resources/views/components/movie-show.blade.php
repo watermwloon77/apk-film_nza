@@ -37,7 +37,7 @@
           <div class="single-right-grids">
 
             <div class="col-md-4 single-right-grid-left">
-              <a href="{{ route('movies.show', $film->id) }}"><img src="/{{ $film->poster }}" alt="" /></a>
+              <a href="{{ route('movies.show', $film->id) }}"><img src="{{ $film->posterUrl() }}" alt="" /></a>
             </div>
             <div class="col-md-8 single-right-grid-right">
               <div class="song-info">
@@ -58,7 +58,7 @@
                       <tbody>
                         @foreach ($perans as $peran)
                         <tr>
-                          <td class="w3-list-info">{{ $peran->cast->name ?? $peran->cast_id }}</td>
+                          <td class="w3-list-info">{{ $peran->cast?->name ?? 'Nama cast tidak tersedia' }}</td>
                           <td class="w3-list-info">{{ $peran->nama_peran ?? $peran->actor }}</td>
                         </tr>
                         @endforeach
@@ -117,16 +117,31 @@
           <div class="all-comments-info">
             <a href="#">Comments</a>
             <div class="agile-info-wthree-box">
+              @if(session('success'))
+                <p class="alert alert-success">{{ session('success') }}</p>
+              @endif
+              @if($errors->any())
+                <p class="alert alert-danger">{{ $errors->first() }}</p>
+              @endif
               @auth
-                <form action="#" method="POST">
+                <form action="{{ route('kritik.store', $film) }}" method="POST">
                   @csrf
-                  <textarea name="comment" placeholder="Tulis komentar kamu di sini..." required=""></textarea>
+                  <textarea name="comment" placeholder="Tulis komentar kamu di sini..." required>{{ old('comment') }}</textarea>
+                  <label for="rating" style="color: #fff;">Rating (opsional)</label>
+                  <select id="rating" name="rating">
+                    <option value="">Tanpa rating</option>
+                    @foreach(range(1, 5) as $rating)
+                      <option value="{{ $rating }}" @selected(old('rating') == $rating)>{{ $rating }} / 5</option>
+                    @endforeach
+                  </select>
                   <input type="submit" value="SEND">
                   <div class="clearfix"> </div>
                 </form>
               @else
                 <p style="color: #fff; text-align: center; padding: 15px;">
-                  Silakan <a href="{{ route('login') }}" style="color: #ff9900; text-decoration: underline; font-weight: bold;">Login</a> terlebih dahulu untuk memberikan komentar.
+                  Silakan <a href="{{ route('login') }}" style="color: #ff9900; text-decoration: underline; font-weight: bold;">Login</a>
+                  atau <a href="{{ route('register') }}" style="color: #ff9900; text-decoration: underline; font-weight: bold;">buat akun</a>
+                  terlebih dahulu untuk memberikan komentar.
                 </p>
               @endauth
             </div>
@@ -141,7 +156,7 @@
                 </div>
                 <div class="media-body">
                   <h5 style="color: #ff9900; font-weight: bold; margin-bottom: 5px;">{{ $comment->user->name ?? 'Anonim' }}</h5>
-                  <p style="color: #fff;">{{ $comment->comment }}</p>
+                  <p style="color: #555; white-space: pre-wrap;">{{ $comment->comment }}</p>
                 </div>
               </div>
             @endforeach
@@ -154,7 +169,7 @@
           <div class="single-grid-right">
             <div class="single-right-grids">
               <div class="col-md-4 single-right-grid-left">
-                <a href="{{ route('movies.show', $similarFilm->id) }}"><img src="/{{ $similarFilm->poster }}" alt="" /></a>
+                <a href="{{ route('movies.show', $similarFilm->id) }}"><img src="{{ $similarFilm->posterUrl() }}" alt="" /></a>
               </div>
               <div class="col-md-8 single-right-grid-right">
                 <a href="{{ route('movies.show', $similarFilm->id) }}" class="title">{{ $similarFilm->title }}</a>
@@ -175,7 +190,7 @@
         @foreach ($filmByRelease as $filmRelease)
           <div class="item">
             <div class="w3l-movie-gride-agile w3l-movie-gride-agile1">
-              <a href="{{ route('movies.show', $filmRelease->id) }}" class="hvr-shutter-out-horizontal"><img src="/{{ $filmRelease->poster }}" title="{{ $filmRelease->title }}" class="img-responsive" alt=" " />
+              <a href="{{ route('movies.show', $filmRelease->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ $filmRelease->posterUrl() }}" title="{{ $filmRelease->title }}" class="img-responsive" alt=" " />
                 <div class="w3l-action-icon"><i class="fa fa-play-circle" aria-hidden="true"></i></div>
               </a>
               <div class="mid-1 agileits_w3layouts_mid_1_home">

@@ -20,15 +20,15 @@
                 <li>
                   <div class="col-sm-4">
                     <ul class="multi-column-dropdown">
-                      @for ($genre = 1; $genre <= $genres->count() - 1; $genre++)
-                        <li><a href="{{ route('genre', $genres[$genre]->id) }}">{{ $genres[$genre]->name }}</a></li>
-                        @if($genre % 7 == 0)
+                      @foreach ($genres as $index => $genre)
+                        <li><a href="{{ route('genre', $genre->id) }}">{{ $genre->name }}</a></li>
+                        @if(($index + 1) % 7 == 0 && !$loop->last)
                           </ul>
                         </div>
                         <div class="col-sm-4">
                           <ul class="multi-column-dropdown">
                         @endif
-                      @endfor
+                      @endforeach
                     </ul>
                   </div>
                   <div class="clearfix"></div>
@@ -36,6 +36,11 @@
               </ul>
             </li>
             <li class="w3_home_act {{ Route::current()->getName() == 'movies' ? 'active' : '' }}"><a href="{{ route('movies') }}">Movies</a></li>
+            @auth
+              @if(auth()->user()->role?->name === 'admin')
+                <li class="{{ request()->routeIs('admin.*') ? 'active' : '' }}"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+              @endif
+            @endauth
 
           </ul>
         </nav>

@@ -38,7 +38,7 @@
         @foreach ($films as $film)
           <div class="item">
             <div class="w3l-movie-gride-agile w3l-movie-gride-agile1">
-              <a href="{{ route('movies.show', $film->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ asset($film->poster) }}" title="album-name" alt=" " />
+              <a href="{{ route('movies.show', $film->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ $film->posterUrl() }}" title="album-name" alt=" " />
                 <div class="w3l-action-icon">
                   <i class="fa fa-play-circle" aria-hidden="true"></i>
                 </div>
@@ -98,7 +98,7 @@
           <div class="w3_agile_featured_movies">
             @foreach ($filmFutured as $film)
               <div class="col-md-2 w3l-movie-gride-agile">
-                <a href="{{ route('movies.show', $film->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ asset($film->poster) }}" title="album-name" alt=" " />
+                <a href="{{ route('movies.show', $film->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ $film->posterUrl() }}" title="album-name" alt=" " />
                   <div class="w3l-action-icon">
                     <i class="fa fa-play-circle" aria-hidden="true"></i>
                   </div>
@@ -135,7 +135,7 @@
           <div class="w3_agile_featured_movies">
             @foreach ($filmRecentAdded as $film)
               <div class="col-md-2 w3l-movie-gride-agile">
-                <a href="{{ route('movies.show', $film->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ asset($film->poster) }}" title="album-name" alt=" " />
+                <a href="{{ route('movies.show', $film->id) }}" class="hvr-shutter-out-horizontal"><img src="{{ $film->posterUrl() }}" title="album-name" alt=" " />
                   <div class="w3l-action-icon">
                     <i class="fa fa-play-circle" aria-hidden="true"></i>
                   </div>

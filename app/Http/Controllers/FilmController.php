@@ -6,11 +6,13 @@ use App\Models\{
     Film,
     Genre,
     Kritik,
-    Peran,
+    User,
 };
 use App\Http\Requests\StoreFilmRequest;
 use App\Http\Requests\UpdateFilmRequest;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class FilmController extends Controller
 {
@@ -19,13 +21,13 @@ class FilmController extends Controller
      */
     public function movies()
     {
-    
+
         $genreFilm = null;
         $films = Film::select('id','title', 'poster','year')
                 ->orderByDesc('year')
                 ->OrderBy('created_at', 'asc')
                 ->paginate(18);
-        return view('movies', compact('films', 'genreFilm'));
+        return view('components.movies', compact('films', 'genreFilm'));
     }
 
     /**
@@ -33,7 +35,9 @@ class FilmController extends Controller
      */
     public function create()
     {
-        //
+        $genres = Genre::orderBy('name')->get();
+
+        return view('admin.movies.create', compact('genres'));
     }
 
     /**
@@ -44,14 +48,10 @@ class FilmController extends Controller
         // Validasi data sudah diurus oleh StoreFilmRequest, kita tinggal simpan
         $data = $request->validated();
 
-        // Jika ada upload poster/gambar
-        if ($request->hasFile('poster')) {
-            $data['poster'] = $request->file('poster')->store('images', 'public');
-        }
-
+        $data['poster'] = $request->file('poster')->store('posters', 'public');
         Film::create($data);
 
-        return redirect()->route('movies')->with('success', 'Film berhasil ditambahkan!');
+        return redirect()->route('admin.movies.index')->with('success', 'Film berhasil ditambahkan!');
     }
 
     /**
@@ -70,12 +70,13 @@ class FilmController extends Controller
                         ->OrderBy('created_at', 'asc')
                         ->limit(9)
                         ->get();
-        $comments        = Kritik::select('comment', 'user_id')
+        $comments        = Kritik::with('user')->select('comment', 'user_id')
                         ->where('film_id', '=', $film->id)
                         ->orderBy('created_at', 'asc')
                         ->limit(10)
                         ->get();
-        $perans         = Peran::all()->where('film_id', '=', $film->id);
+        $perans = $film->perans()->with('cast')->get();
+
         return view('components.movie-show', compact('film','filmByGenre','filmByRelease','comments', 'perans'));
     }
 
@@ -84,33 +85,50 @@ class FilmController extends Controller
      */
     public function edit(Film $film)
     {
-        //
+        $genres = Genre::orderBy('name')->get();
+
+        return view('admin.movies.edit', compact('film', 'genres'));
     }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateFilmRequest $request, Film $film)
-{
+    {
         $data = $request->validated();
+        $previousPoster = $film->posterStoragePath();
 
-        // Jika upload gambar baru
         if ($request->hasFile('poster')) {
-            $data['poster'] = $request->file('poster')->store('images', 'public');
+            $data['poster'] = $request->file('poster')->store('posters', 'public');
         }
 
         $film->update($data);
 
-        return redirect()->route('movies')->with('success', 'Film berhasil diperbarui!');
+        if (isset($data['poster']) && $previousPoster && Storage::disk('public')->exists($previousPoster)) {
+            Storage::disk('public')->delete($previousPoster);
+        }
+
+        return redirect()->route('admin.movies.index')->with('success', 'Film berhasil diperbarui!');
     }
+
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Film $film)
-{
-        $film->delete();
+    {
+        $posterPath = $film->posterStoragePath();
 
-        return redirect()->route('movies')->with('success', 'Film berhasil dihapus!');
+        DB::transaction(function () use ($film) {
+            $film->kritiks()->delete();
+            $film->perans()->delete();
+            $film->delete();
+        });
+
+        if ($posterPath && Storage::disk('public')->exists($posterPath)) {
+            Storage::disk('public')->delete($posterPath);
+        }
+
+        return redirect()->route('admin.movies.index')->with('success', 'Film berhasil dihapus!');
     }
 
     public function movieHome()
@@ -129,7 +147,7 @@ class FilmController extends Controller
                         ->orderByDesc('year')
                         ->OrderBy('created_at', 'asc')
                         ->limit(6)->get();
-                        
+
         // Ubah dari 'components/home' menjadi 'home' di bawah ini:
         return view('home', compact('filmSlidey','films','filmFutured','filmRecentAdded'));
     }
@@ -143,6 +161,19 @@ class FilmController extends Controller
                 ->orderByDesc('year')
                 ->OrderBy('created_at', 'asc')
                 ->paginate(18);
-        return view('movies', compact('films','genreFilm'));
+        return view('components.movies', compact('films','genreFilm'));
+    }
+
+    public function adminIndex()
+    {
+        $films = Film::with('genre')->orderByDesc('created_at')->paginate(10);
+        $stats = [
+            'films' => Film::count(),
+            'genres' => Genre::count(),
+            'users' => User::count(),
+            'reviews' => Kritik::count(),
+        ];
+
+        return view('admin.movies.index', compact('films', 'stats'));
     }
 }

@@ -26,3 +26,14 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
     Route::post('/movies/{film}/kritik', [KritikController::class, 'store'])->name('kritik.store');
 });
+
+// Route Dashboard Admin (CRUD Film)
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [FilmController::class, 'adminIndex'])->name('dashboard');
+    Route::get('/movies', [FilmController::class, 'adminIndex'])->name('movies.index');
+    Route::get('/movies/create', [FilmController::class, 'create'])->name('movies.create');
+    Route::post('/movies', [FilmController::class, 'store'])->name('movies.store');
+    Route::get('/movies/{film}/edit', [FilmController::class, 'edit'])->name('movies.edit');
+    Route::put('/movies/{film}', [FilmController::class, 'update'])->name('movies.update');
+    Route::delete('/movies/{film}', [FilmController::class, 'destroy'])->name('movies.destroy');
+});

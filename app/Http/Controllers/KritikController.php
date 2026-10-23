@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Film;
 use App\Models\Kritik;
-use App\Http\Requests\StoreKritikRequest;
 use App\Http\Requests\UpdateKritikRequest;
+use Illuminate\Http\Request;
 
 class KritikController extends Controller
 {
@@ -24,23 +25,22 @@ class KritikController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-public function store(Request $request, $film_id)
+    public function store(Request $request, Film $film)
     {
-        $request->validate([
-            'comment' => 'required|string',
+        $validated = $request->validate([
+            'comment' => ['required', 'string', 'max:5000'],
+            'rating' => ['nullable', 'integer', 'between:1,5'],
         ]);
 
-        Kritik::create([
-            'film_id' => $film_id,
-            'user_id' => auth()->id(),
-            'comment' => $request->comment,
+        $request->user()->kritiks()->create([
+            'film_id' => $film->id,
+            'comment' => $validated['comment'],
+            'rating' => $validated['rating'] ?? 0,
         ]);
 
         return back()->with('success', 'Komentar berhasil ditambahkan!');
     }
+
     /**
      * Display the specified resource.
      */

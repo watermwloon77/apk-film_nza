@@ -9,7 +9,7 @@ class Kritik extends Model
 {
     use HasFactory;
     protected $table = 'kritiks'; // atau sesuaikan dengan nama tabel kritiknya
-    protected $fillable = ['film_id', 'user_id', 'comment'];
+    protected $fillable = ['film_id', 'user_id', 'comment', 'rating'];
 
     // Relasi ke User
     public function user()

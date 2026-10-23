@@ -11,7 +11,18 @@
     </div>
     <div class="w3l_sign_in_register">
       <ul>
-        <li><a href="#" data-toggle="modal" data-target="#myModal">Login</a></li>
+        @auth
+          <li>{{ auth()->user()->name }}</li>
+          <li>
+            <form action="{{ route('logout') }}" method="POST" style="display: inline;">
+              @csrf
+              <button type="submit" class="btn btn-link" style="padding: 0; color: inherit;">Logout</button>
+            </form>
+          </li>
+        @else
+          <li><a href="{{ route('login') }}">Login</a></li>
+          <li><a href="{{ route('register') }}">Register</a></li>
+        @endauth
       </ul>
     </div>
     <div class="clearfix"> </div>
